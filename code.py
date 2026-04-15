@@ -32,8 +32,10 @@ screen.update()
 
 key_held_w = False
 key_held_s = False
-key_held_a=False
-key_held_d=False
+key_held_a = False
+key_held_d = False
+key_held_left=False
+key_held_right=False
 
 moved=True
 distance_array=[]
@@ -75,6 +77,41 @@ col=spawn_counter%width
 
 player.goto((col*tile_size)+map_left+(tile_size/2), map_top-(row*tile_size)-(tile_size/2))
 
+# Turtle for drawing FPS text
+width = screenTk.winfo_screenwidth()
+height = screenTk.winfo_screenheight()
+fps_turtle = turtle.Turtle()
+fps_turtle.hideturtle()
+fps_turtle.penup()
+fps_turtle.goto(-(width/2)+50, (height/2)-50)
+
+# Variables for FPS calculation
+frame_count = 0
+start_time = time.time()
+fps = 0
+
+def update():
+    global frame_count, start_time, fps
+
+    # Count frames
+    frame_count += 1
+
+    # Calculate FPS every second
+    current_time = time.time()
+    elapsed = current_time - start_time
+
+    if elapsed >= 1.0:
+        fps = frame_count / elapsed
+        frame_count = 0
+        start_time = current_time
+
+    # Clear and redraw FPS text
+    fps_turtle.clear()
+    fps_turtle.write(f"FPS: {int(fps//1)}", font=("Arial", 16, "normal"))
+
+    # Update screen
+    screen.update()
+
 def press_w():
     global key_held_w
     key_held_w = True
@@ -107,6 +144,22 @@ def release_d():
     global key_held_d
     key_held_d = False
 
+def press_left():
+    global key_held_left
+    key_held_left = True
+
+def release_left():
+    global key_held_left
+    key_held_left = False
+
+def press_right():
+    global key_held_right
+    key_held_right = True
+
+def release_right():
+    global key_held_right
+    key_held_right = False
+
 def is_wall(x, y):
     global height, width, map, tile_size, map_left, map_top
 
@@ -129,9 +182,16 @@ def player_movement():
         player.forward(2.5)
     if key_held_s and not is_wall(player.xcor()-2.5*math.cos(dir), player.ycor()-2.5*math.sin(dir)):
         player.backward(2.5)
-    if key_held_a:
+
+    if key_held_d and not is_wall(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir)):
+        player.goto(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir))
+
+    if key_held_a and not is_wall(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir)):
+        player.goto(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir))
+
+    if key_held_left:
         player.seth(player.heading()+5)
-    if key_held_d:
+    if key_held_right:
         player.seth(player.heading()-5)
 
 def casting_ray(num_rays, FOV):
@@ -223,23 +283,31 @@ def main():
 
     player_movement()
 
+    update()
+
     #print(distance_array)
 
     # print(player.xcor(), player.ycor())
     # print(player.heading())
 
     screen.update()
-    screen.ontimer(main, 20)
+    screen.ontimer(main, 10)
 
 screen.listen()
 screen.onkeypress(press_w, "w")  
 screen.onkeyrelease(release_w, "w")
 screen.onkeypress(press_s, "s")  
 screen.onkeyrelease(release_s, "s")
+
 screen.onkeypress(press_a, "a")  
 screen.onkeyrelease(release_a, "a")
 screen.onkeypress(press_d, "d")  
 screen.onkeyrelease(release_d, "d")
+
+screen.onkeypress(press_left, "Left")  
+screen.onkeyrelease(release_left, "Left")
+screen.onkeypress(press_right, "Right")
+screen.onkeyrelease(release_right, "Right")
 
 main()
 
