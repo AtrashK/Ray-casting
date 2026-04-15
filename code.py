@@ -229,7 +229,7 @@ def main():
     # print(player.heading())
 
     screen.update()
-    screen.ontimer(main, 20)
+    screen.ontimer(main, 10)
 
 screen.listen()
 screen.onkeypress(press_w, "w")  
