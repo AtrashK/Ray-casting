@@ -85,33 +85,6 @@ fps_turtle.hideturtle()
 fps_turtle.penup()
 fps_turtle.goto(-(width/2)+50, (height/2)-50)
 
-# Variables for FPS calculation
-frame_count = 0
-start_time = time.time()
-fps = 0
-
-def update():
-    global frame_count, start_time, fps
-
-    # Count frames
-    frame_count += 1
-
-    # Calculate FPS every second
-    current_time = time.time()
-    elapsed = current_time - start_time
-
-    if elapsed >= 1.0:
-        fps = frame_count / elapsed
-        frame_count = 0
-        start_time = current_time
-
-    # Clear and redraw FPS text
-    fps_turtle.clear()
-    fps_turtle.write(f"FPS: {int(fps//1)}", font=("Arial", 16, "normal"))
-
-    # Update screen
-    screen.update()
-
 def press_w():
     global key_held_w
     key_held_w = True
@@ -185,7 +158,6 @@ def player_movement():
 
     if key_held_d and not is_wall(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir)):
         player.goto(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir))
-
     if key_held_a and not is_wall(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir)):
         player.goto(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir))
 
@@ -283,7 +255,7 @@ def main():
 
     player_movement()
 
-    update()
+    #update()
 
     #print(distance_array)
 
@@ -291,7 +263,7 @@ def main():
     # print(player.heading())
 
     screen.update()
-    screen.ontimer(main, 10)
+    screen.ontimer(main, 1)
 
 screen.listen()
 screen.onkeypress(press_w, "w")  
