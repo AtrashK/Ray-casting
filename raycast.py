@@ -21,6 +21,7 @@ screen.tracer(0) # stops time
 player=turtle.Turtle()
 player.up()
 player.ht()
+player.setheading(90)
 
 #setting up the test turtle (not in use)
 test=turtle.Turtle()
@@ -44,23 +45,54 @@ key_held_d = False
 
 distance_array=[] #array containing the distances from the player to the wall
 
-# map=["########",
-#      "#   #  #",
-#      "# # ## #",
-#      "# #    #",
-#      "#    # #",
-#      "########"]
+map=["########",
+     "#   #  #",
+     "# # ## #",
+     "# #    #",
+     "#    # #",
+     "########"]
 
 #it's in the name dawg
-map=["#########",
-     "#       #",
-     "# ## ## #",
-     "# #   # #",
-     "#   #   #",
-     "# #   # #",
-     "# ## ## #",
-     "#       #",
-     "#########",]
+# map=["#########",
+#      "#       #",
+#      "# ## ## #",
+#      "# #   # #",
+#      "#   #   #",
+#      "# #   # #",
+#      "# ## ## #",
+#      "#       #",
+#      "#########",]
+
+width=len(map[0])
+height=len(map)
+tile_size=10
+
+mapping=turtle.Turtle()
+mapping.ht()
+mapping.up()
+mapping.color("white")
+mapping.fillcolor("white")
+
+player_sprite=turtle.Turtle()
+player_sprite.up()
+player_sprite.color("red")
+player_sprite.shape("circle")
+player_sprite.shapesize(0.3, 0.3)
+
+screen.tracer(0) # stops time
+
+for i in range((len(map))*len(map[1])):
+    turtle.up()
+    turtle.goto(tile_size*(i%width), -tile_size*(i//width))
+    if map[i//width][i%width]=="#":
+        turtle.goto(turtle.xcor()-tile_size/2, turtle.ycor()+tile_size/2)
+        turtle.down()
+        turtle.begin_fill()
+        turtle.setx(turtle.xcor()+tile_size)
+        turtle.sety(turtle.ycor()-tile_size)
+        turtle.setx(turtle.xcor()-tile_size)
+        turtle.sety(turtle.ycor()+tile_size)
+        turtle.end_fill()
 
 #properties of the map
 width=len(map[0])
@@ -83,8 +115,10 @@ while (spawn_found==False):
 #defining which row and col that is
 row=spawn_counter//width
 col=spawn_counter%width
+starting_x=(col*tile_size)+map_left+(tile_size/2)
+starting_y=map_top-(row*tile_size)-(tile_size/2)
 
-player.goto((col*tile_size)+map_left+(tile_size/2), map_top-(row*tile_size)-(tile_size/2)) #player spawns here
+player.goto(starting_x, starting_y) #player spawns here
 
 #the function for the holding and release of the 4 movement keys
 def press_w():
@@ -136,16 +170,25 @@ def is_wall(x, y): #function for checking if a point x,y is in a wall
 def player_movement(): #function for player movement
     global key_held_w, key_held_s, key_held_a, key_held_d, moved #one day
     dir=math.radians(player.heading()) #changing the player's direction to radians, cuz pymath weird like that 
+    fd_bd_x=2.5*math.cos(math.radians(dir))
+    fd_bd_y=2.5*math.sin(math.radians(dir))
+    lf_rt_x=2.5*math.sin(math.radians(dir-90))
+    lf_rt_y=2.5*math.cos(math.radians(dir-90))
 
-    if key_held_w and not is_wall(player.xcor()+2.5*math.cos(dir), player.ycor()+2.5*math.sin(dir)): #if w held, and a wall aint infront
+    if key_held_w and not is_wall(player.xcor()+fd_bd_x, player.ycor()+fd_bd_y): #if w held, and a wall aint infront
         player.forward(2.5)
-    if key_held_s and not is_wall(player.xcor()-2.5*math.cos(dir), player.ycor()-2.5*math.sin(dir)): #if s held, and a wall aint behind
+    if key_held_s and not is_wall(player.xcor()-fd_bd_x, player.ycor()-fd_bd_y): #if s held, and a wall aint behind
         player.backward(2.5)
 
-    if key_held_d and not is_wall(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir)): #if d held, and a wall aint to the right
-        player.goto(player.xcor()+2.5*math.cos(90-dir), player.ycor()-2.5*math.sin(90-dir))
-    if key_held_a and not is_wall(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir)): #if a held, and a wall aint to the right
-        player.goto(player.xcor()-2.5*math.cos(90-dir), player.ycor()+2.5*math.sin(90-dir))
+    if key_held_d and not is_wall(player.xcor()-lf_rt_x, player.ycor()+lf_rt_y): #if d held, and a wall aint to the right
+        # print(lf_rt_x, lf_rt_y)
+        # print("current position = ", player.xcor(), player.ycor())
+        # print("x = ", player.xcor()-lf_rt_x)
+        # print("y = ", player.ycor()+lf_rt_y)
+        player.setx(player.xcor()-lf_rt_x)
+        player.sety(player.ycor()+lf_rt_y)
+    if key_held_a and not is_wall(player.xcor()+lf_rt_x, player.ycor()-lf_rt_y): #if a held, and a wall aint to the right
+        player.goto(player.xcor()+lf_rt_x, player.ycor()-lf_rt_y)
 
 def casting_ray(num_rays, FOV): #function for calculating distances to a wall 
     global distance_array, tile_size #ignore this
@@ -155,8 +198,8 @@ def casting_ray(num_rays, FOV): #function for calculating distances to a wall
         y=player.ycor() #starting y cor of the ray
         distance=0 #starting distance of the ray 
         dir=player.heading()+(FOV/2)-((FOV*i)/num_rays) #setting the direction of the ray
-        dx=math.cos(math.radians(dir)) #setting the x increment
-        dy=math.sin(math.radians(dir)) #setting the y increment
+        dx=math.cos(math.radians(dir))#setting the x increment
+        dy=math.sin(math.radians(dir))#setting the y increment
 
         while not is_wall(x,y): #while the point ahead isn't a wall
             x+=dx #increasing the x cor of the ray
@@ -173,7 +216,7 @@ def casting_ray(num_rays, FOV): #function for calculating distances to a wall
         #         else:
         #             next_vl=tile_size*((x//tile_size)-1)
 
-        #     distance_to_next_vl=abs((next_vl-x)/dx)
+        #     distance_to_next_vl=(next_vl-x)/dx
 
         #     if (dy>0):
         #         next_hl=tile_size*((y//tile_size)+1)#the next horizontal line
@@ -183,12 +226,17 @@ def casting_ray(num_rays, FOV): #function for calculating distances to a wall
         #         else:
         #             next_hl=tile_size*((y//tile_size)-1)
 
-        #     distance_to_next_hl=abs((next_hl-y)/dy)
+        #     distance_to_next_hl=(next_hl-y)/dy
 
         #     if (distance_to_next_vl<distance_to_next_hl):
         #         distance+=distance_to_next_vl
-        #         x+=distance_to_next_vl*math.cos(math.radians(dir))
-        #         y+=distance_to_next_vl*math.sin(math.radians(dir))
+        #         if (dx>0):
+        #             x+=distance_to_next_vl*dx
+        #             y+=distance_to_next_vl*dy
+        #         else:
+        #             x+=(next_vl-x-tile_size)
+        #             y+=-(next_vl-x-tile_size)*math.tan(math.radians(180-dir))
+
         #     else:
         #         distance+=distance_to_next_hl
         #         x+=distance_to_next_hl*math.cos(math.radians(dir))
@@ -242,7 +290,37 @@ def mouse_movement(last_mouse_x): #function for chaing the player dir based on m
     sensitivity = 0.2 #some variable
     player.seth(player.heading() - delta_x * sensitivity) #setting the dir
 
-def main(): #main function
+def minimap(starting_x, starting_y):
+    global map, tile_size
+
+    mapping.clear()
+    width=len(map[0])
+    height=len(map)
+    map_tile_size=20
+
+    screen.tracer(0) # stops time
+
+    x_adj=-800
+    y_adj=400
+
+    player_sprite.setheading(player.heading())
+    player_sprite.goto(player.xcor()*(map_tile_size/tile_size)+((-starting_x+tile_size)*(map_tile_size/tile_size))+x_adj, player.ycor()*(map_tile_size/tile_size)-((starting_y+tile_size)*(map_tile_size/tile_size))+y_adj)
+
+    for i in range((len(map))*len(map[1])):
+        mapping.up()
+        mapping.goto(map_tile_size*(i%width)+x_adj, -map_tile_size*(i//width)+y_adj)
+        if map[i//width][i%width]=="#":
+            mapping.goto(mapping.xcor()-map_tile_size/2, mapping.ycor()+map_tile_size/2)
+            mapping.down()
+            mapping.begin_fill()
+            mapping.setx(mapping.xcor()+map_tile_size)
+            mapping.sety(mapping.ycor()-map_tile_size)
+            mapping.setx(mapping.xcor()-map_tile_size)
+            mapping.sety(mapping.ycor()+map_tile_size)
+            mapping.end_fill()
+    
+
+def main(starting_x, starting_y): #main function
     #de variables
     num_rays=120
     FOV=90
@@ -255,8 +333,22 @@ def main(): #main function
 
     mouse_movement(last_mouse_x)
 
+    minimap(starting_x, starting_y) #-125, 75   
+
+    dir=player.heading()
+    lf_rt_x=2.5*math.cos(math.radians(dir-90))
+    lf_rt_y=2.5*math.sin(math.radians(dir-90))
+    #print("current position = ", player.xcor(), player.ycor())
+    # print("x = ", player.xcor()+lf_rt_x)
+    # print("y = ", player.ycor()+lf_rt_y)
+
+
+    # dir=player.heading()
+    # print("dir = ", dir)
+    # print(2.5*math.cos(math.radians(90-dir)))
+
     screen.update()
-    screen.ontimer(main, 1) #repeats the main function, every ms
+    screen.ontimer(lambda:main(starting_x, starting_y), 1) #repeats the main function, every ms
 
 #movement stuff, idk man
 screen.listen()
@@ -270,6 +362,6 @@ screen.onkeyrelease(release_a, "a")
 screen.onkeypress(press_d, "d")  
 screen.onkeyrelease(release_d, "d")
 
-main()
+main(starting_x, starting_y)
 
 screen.mainloop()
