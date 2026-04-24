@@ -21,7 +21,7 @@ screen.tracer(0) # stops time
 player=turtle.Turtle()
 player.up()
 player.ht()
-player.setheading(90)
+player.setheading(30)
 
 #setting up the test turtle (not in use)
 test=turtle.Turtle()
@@ -170,25 +170,22 @@ def is_wall(x, y): #function for checking if a point x,y is in a wall
 def player_movement(): #function for player movement
     global key_held_w, key_held_s, key_held_a, key_held_d, moved #one day
     dir=math.radians(player.heading()) #changing the player's direction to radians, cuz pymath weird like that 
-    fd_bd_x=2.5*math.cos(math.radians(dir))
-    fd_bd_y=2.5*math.sin(math.radians(dir))
-    lf_rt_x=2.5*math.sin(math.radians(dir-90))
-    lf_rt_y=2.5*math.cos(math.radians(dir-90))
+    fd_bd_x=2.5*math.cos(dir)
+    fd_bd_y=2.5*math.sin(dir)
+    lf_rt_x=2.5*math.cos(dir-(math.pi/2))
+    lf_rt_y=2.5*math.sin(dir-(math.pi/2))
+
+    print("lf_rt_x = ", lf_rt_x)
 
     if key_held_w and not is_wall(player.xcor()+fd_bd_x, player.ycor()+fd_bd_y): #if w held, and a wall aint infront
         player.forward(2.5)
     if key_held_s and not is_wall(player.xcor()-fd_bd_x, player.ycor()-fd_bd_y): #if s held, and a wall aint behind
         player.backward(2.5)
 
-    if key_held_d and not is_wall(player.xcor()-lf_rt_x, player.ycor()+lf_rt_y): #if d held, and a wall aint to the right
-        # print(lf_rt_x, lf_rt_y)
-        # print("current position = ", player.xcor(), player.ycor())
-        # print("x = ", player.xcor()-lf_rt_x)
-        # print("y = ", player.ycor()+lf_rt_y)
-        player.setx(player.xcor()-lf_rt_x)
-        player.sety(player.ycor()+lf_rt_y)
-    if key_held_a and not is_wall(player.xcor()+lf_rt_x, player.ycor()-lf_rt_y): #if a held, and a wall aint to the right
-        player.goto(player.xcor()+lf_rt_x, player.ycor()-lf_rt_y)
+    if key_held_d and not is_wall(player.xcor()+lf_rt_x, player.ycor()+lf_rt_y): #if d held, and a wall aint to the right
+        player.goto(player.xcor()+lf_rt_x, player.ycor()+lf_rt_y)
+    if key_held_a and not is_wall(player.xcor()-lf_rt_x, player.ycor()-lf_rt_y): #if a held, and a wall aint to the right
+        player.goto(player.xcor()-lf_rt_x, player.ycor()-lf_rt_y)
 
 def casting_ray(num_rays, FOV): #function for calculating distances to a wall 
     global distance_array, tile_size #ignore this
@@ -335,13 +332,7 @@ def main(starting_x, starting_y): #main function
 
     minimap(starting_x, starting_y) #-125, 75   
 
-    dir=player.heading()
-    lf_rt_x=2.5*math.cos(math.radians(dir-90))
-    lf_rt_y=2.5*math.sin(math.radians(dir-90))
     #print("current position = ", player.xcor(), player.ycor())
-    # print("x = ", player.xcor()+lf_rt_x)
-    # print("y = ", player.ycor()+lf_rt_y)
-
 
     # dir=player.heading()
     # print("dir = ", dir)
