@@ -44,28 +44,20 @@ key_held_a = False
 key_held_d = False
 
 distance_array=[] #array containing the distances from the player to the wall
+map=[] #it's in the name dawg
 
-map=["########",
-     "#   #  #",
-     "# # ## #",
-     "# #    #",
-     "#    # #",
-     "########"]
+with open("map.txt") as readfile:
+    line=readfile.readline().rstrip("\n")
+    while line:
+        map.append(line)
+        line=readfile.readline().rstrip("\n")
 
-#it's in the name dawg
-# map=["#########",
-#      "#       #",
-#      "# ## ## #",
-#      "# #   # #",
-#      "#   #   #",
-#      "# #   # #",
-#      "# ## ## #",
-#      "#       #",
-#      "#########",]
-
+#properties of the map
 width=len(map[0])
 height=len(map)
-tile_size=10
+tile_size=50
+map_left=-1*(width/2)*tile_size
+map_top=(height/2)*tile_size
 
 mapping=turtle.Turtle()
 mapping.ht()
@@ -93,13 +85,6 @@ for i in range((len(map))*len(map[1])):
         turtle.setx(turtle.xcor()-tile_size)
         turtle.sety(turtle.ycor()+tile_size)
         turtle.end_fill()
-
-#properties of the map
-width=len(map[0])
-height=len(map)
-tile_size=50
-map_left=-1*(width/2)*tile_size
-map_top=(height/2)*tile_size
 
 #variables needed in finding the spawn point
 spawn_found=False
@@ -175,8 +160,6 @@ def player_movement(): #function for player movement
     lf_rt_x=2.5*math.cos(dir-(math.pi/2))
     lf_rt_y=2.5*math.sin(dir-(math.pi/2))
 
-    print("lf_rt_x = ", lf_rt_x)
-
     if key_held_w and not is_wall(player.xcor()+fd_bd_x, player.ycor()+fd_bd_y): #if w held, and a wall aint infront
         player.forward(2.5)
     if key_held_s and not is_wall(player.xcor()-fd_bd_x, player.ycor()-fd_bd_y): #if s held, and a wall aint behind
@@ -187,7 +170,7 @@ def player_movement(): #function for player movement
     if key_held_a and not is_wall(player.xcor()-lf_rt_x, player.ycor()-lf_rt_y): #if a held, and a wall aint to the right
         player.goto(player.xcor()-lf_rt_x, player.ycor()-lf_rt_y)
 
-def casting_ray(num_rays, FOV): #function for calculating distances to a wall 
+def casting_ray(num_rays, FOV, horror_mode): #function for calculating distances to a wall 
     global distance_array, tile_size #ignore this
     distance_array.clear() #emptys the distance array every frame
     for i in range(0, num_rays+1): #repeats for number of rays
@@ -242,9 +225,9 @@ def casting_ray(num_rays, FOV): #function for calculating distances to a wall
         corrected_distance=distance*math.cos(math.radians(player.heading()-dir))+0.00000001 #corrects the fish-eye...ness
         distance_array.append(corrected_distance) #appends the distance to the array
 
-    render(num_rays, distance_array)
+    render(num_rays, distance_array, horror_mode)
 
-def render(num_rays, distance_array): #function for actually rendering everything
+def render(num_rays, distance_array, horror_mode): #function for actually rendering everything
     ray.clear() #clears the screen every frame
     width = screenTk.winfo_screenwidth() #width of the screen
     height = screenTk.winfo_screenheight() #height of the screen
@@ -255,12 +238,18 @@ def render(num_rays, distance_array): #function for actually rendering everythin
         #drawing the room
         ray.up()
         ray.sety(height/2)
-        ray.color(100, 100, 100)
+        if (horror_mode):
+            ray.color(0, 0, 0)
+        else:
+            ray.color(100, 100, 100)
         ray.down()
         ray.sety(length/2)
         #drawing the walls
         ray.up()
-        b=int(2000/distance_array[i])
+        if (horror_mode):
+            b=int(1000/distance_array[i])
+        else:
+            b=int(2000/distance_array[i])
         b=min(b, 255)
         b=max(b, 0.00000001)
         ray.color(0, 0, b)
@@ -269,11 +258,14 @@ def render(num_rays, distance_array): #function for actually rendering everythin
         #drawing the floor
         ray.up()
         ray.down()
-        ray.color(10, 10, 10)
+        if (horror_mode):
+            ray.color(0, 0, 0)
+        else:
+            ray.color(10, 10, 10)
         ray.sety(-height/2)
         ray.setx(ray.xcor()+ray.pensize())
 
-def mouse_movement(last_mouse_x): #function for chaing the player dir based on mousemovement
+def mouse_movement(last_mouse_x): #function for changing the player dir based on mousemovement
     width = screenTk.winfo_screenwidth()
     
     current_x = screenTk.winfo_pointerx()
@@ -321,10 +313,11 @@ def main(starting_x, starting_y): #main function
     #de variables
     num_rays=120
     FOV=90
+    horror_mode=True
     last_mouse_x = screenTk.winfo_pointerx()
 
     #los funciones
-    casting_ray(num_rays, FOV)
+    casting_ray(num_rays, FOV, horror_mode)
 
     player_movement()
 
@@ -339,7 +332,7 @@ def main(starting_x, starting_y): #main function
     # print(2.5*math.cos(math.radians(90-dir)))
 
     screen.update()
-    screen.ontimer(lambda:main(starting_x, starting_y), 1) #repeats the main function, every ms
+    screen.ontimer(lambda:main(starting_x, starting_y), 10) #repeats the main function, every ms
 
 #movement stuff, idk man
 screen.listen()
