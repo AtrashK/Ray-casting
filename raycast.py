@@ -52,6 +52,13 @@ with open("map.txt") as readfile:
         map.append(line)
         line=readfile.readline().rstrip("\n")
 
+########
+#   #  #
+# # ## #
+# #    #
+#    # #
+########
+
 #properties of the map
 width=len(map[0])
 height=len(map)
@@ -187,40 +194,40 @@ def casting_ray(num_rays, FOV, horror_mode): #function for calculating distances
             distance+=1
 
         #idk what was going on, some DDA bs
-        # while not is_wall(x, y): 
-        #     if (dx>0):
-        #         next_vl=tile_size*((x//tile_size)+1)#the next vertical line
-        #     else:
-        #         if(x%tile_size!=0):
-        #             next_vl=tile_size*(x//tile_size)
-        #         else:
-        #             next_vl=tile_size*((x//tile_size)-1)
+        while not is_wall(x, y): 
+            if (dx>0):
+                next_vl=tile_size*((x//tile_size)+1)#the next vertical line
+            else:
+                if(x%tile_size!=0):
+                    next_vl=tile_size*(x//tile_size)
+                else:
+                    next_vl=tile_size*((x//tile_size)-1)
 
-        #     distance_to_next_vl=(next_vl-x)/dx
+            distance_to_next_vl=(next_vl-x)/dx
 
-        #     if (dy>0):
-        #         next_hl=tile_size*((y//tile_size)+1)#the next horizontal line
-        #     else:
-        #         if(y%tile_size!=0):
-        #             next_hl=tile_size*(y//tile_size)
-        #         else:
-        #             next_hl=tile_size*((y//tile_size)-1)
+            if (dy>0):
+                next_hl=tile_size*((y//tile_size)+1)#the next horizontal line
+            else:
+                if(y%tile_size!=0):
+                    next_hl=tile_size*(y//tile_size)
+                else:
+                    next_hl=tile_size*((y//tile_size)-1)
 
-        #     distance_to_next_hl=(next_hl-y)/dy
+            distance_to_next_hl=(next_hl-y)/dy
 
-        #     if (distance_to_next_vl<distance_to_next_hl):
-        #         distance+=distance_to_next_vl
-        #         if (dx>0):
-        #             x+=distance_to_next_vl*dx
-        #             y+=distance_to_next_vl*dy
-        #         else:
-        #             x+=(next_vl-x-tile_size)
-        #             y+=-(next_vl-x-tile_size)*math.tan(math.radians(180-dir))
+            if (distance_to_next_vl<distance_to_next_hl):
+                distance+=distance_to_next_vl
+                if (dx>0):
+                    x+=distance_to_next_vl*dx
+                    y+=distance_to_next_vl*dy
+                else:
+                    x+=(next_vl-x-tile_size)
+                    y+=-(next_vl-x-tile_size)*math.tan(math.radians(180-dir))
 
-        #     else:
-        #         distance+=distance_to_next_hl
-        #         x+=distance_to_next_hl*math.cos(math.radians(dir))
-        #         y+=distance_to_next_hl*math.sin(math.radians(dir))
+            else:
+                distance+=distance_to_next_hl
+                x+=distance_to_next_hl*math.cos(math.radians(dir))
+                y+=distance_to_next_hl*math.sin(math.radians(dir))
         
         corrected_distance=distance*math.cos(math.radians(player.heading()-dir))+0.00000001 #corrects the fish-eye...ness
         distance_array.append(corrected_distance) #appends the distance to the array
@@ -291,7 +298,7 @@ def minimap(starting_x, starting_y):
 
     x_adj=-800
     y_adj=400
-
+    dir=player.heading()
     player_sprite.setheading(player.heading())
     player_sprite.goto(player.xcor()*(map_tile_size/tile_size)+((-starting_x+tile_size)*(map_tile_size/tile_size))+x_adj, player.ycor()*(map_tile_size/tile_size)-((starting_y+tile_size)*(map_tile_size/tile_size))+y_adj)
 
@@ -307,13 +314,14 @@ def minimap(starting_x, starting_y):
             mapping.setx(mapping.xcor()-map_tile_size)
             mapping.sety(mapping.ycor()+map_tile_size)
             mapping.end_fill()
+    screen.update()
     
 
 def main(starting_x, starting_y): #main function
     #de variables
     num_rays=120
     FOV=90
-    horror_mode=True
+    horror_mode=False
     last_mouse_x = screenTk.winfo_pointerx()
 
     #los funciones
