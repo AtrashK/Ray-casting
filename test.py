@@ -39,6 +39,8 @@ for i in range(len(map[0]),len(map)):
         mapping.sety(mapping.ycor()-map_tile_size)
         mapping.setx(mapping.xcor()-map_tile_size)
         mapping.sety(mapping.ycor()+map_tile_size)
+
+        mapping.sety(mapping.ycor()+map_tile_size)
         mapping.end_fill()
 
 turtle.goto(-70, 50)

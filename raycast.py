@@ -319,7 +319,7 @@ def minimap(starting_x, starting_y):
 
 def main(starting_x, starting_y): #main function
     #de variables
-    num_rays=120
+    num_rays=60
     FOV=90
     horror_mode=False
     last_mouse_x = screenTk.winfo_pointerx()
